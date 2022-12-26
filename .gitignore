@@ -1,6 +1,5 @@
-/fastapienv/
-/.idea/FastAPI-The-Complete-Course.iml
-/.idea/misc.xml
-/.idea/modules.xml
-/.idea/inspectionProfiles/profiles_settings.xml
-/.idea/vcs.xml
+.env
+.python-version
+__pycache__/
+.mypy_cache/
+.pytest_cache/
