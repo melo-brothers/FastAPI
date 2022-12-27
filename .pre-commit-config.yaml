@@ -1,0 +1,47 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+    - id: check-ast
+    - id: check-case-conflict
+    - id: check-docstring-first
+    - id: check-json
+    - id: check-yaml
+    - id: check-merge-conflict
+    - id: debug-statements
+    - id: end-of-file-fixer
+    - id: mixed-line-ending
+    - id: requirements-txt-fixer
+    - id: trailing-whitespace
+- repo: https://github.com/psf/black
+  rev: 22.10.0
+  hooks:
+  - id: black
+    language_version: python3.10
+    description: "Black: The uncompromising Python code formatter"
+    require_serial: true
+    types: [python]
+    args: [
+      "-l 140",
+      "--verbose"
+    ]
+- repo: https://github.com/timothycrosley/isort
+  rev: 5.10.1
+  hooks:
+    - id: isort
+      args: [
+        "--profile=black",
+        "--lines-after-import=2"
+      ]
+      exclude: 'contrib/'
+- repo: https://github.com/PyCQA/flake8
+  rev: 6.0.0
+  hooks:
+    - id: flake8
+      args: [
+        "--ignore=W503",
+        "--max-line-length=140"
+      ]
+      exclude: 'docs/'

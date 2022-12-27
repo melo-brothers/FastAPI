@@ -1,13 +1,14 @@
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from backend import models
-from backend.database import get_db
+from backend.auth.services import get_current_user, get_user_exception
+from backend.core.database import get_db
 
-from .auth import get_current_user, get_user_exception
+from .exceptions import http_exception
+from .models import Todos
+from .schemas import Todo
 
 router = APIRouter(
     prefix="/todos",
@@ -16,16 +17,9 @@ router = APIRouter(
 )
 
 
-class Todo(BaseModel):
-    title: str
-    description: Optional[str]
-    priority: int = Field(gt=0, lt=6, description="The priority must be between 1-5")
-    complete: bool
-
-
 @router.get("/")
 async def read_all(db: Session = Depends(get_db)):
-    return db.query(models.Todos).all()
+    return db.query(Todos).all()
 
 
 @router.get("/user")
@@ -33,8 +27,8 @@ async def read_all_by_user(user: dict = Depends(get_current_user),
                            db: Session = Depends(get_db)):
     if not user:
         raise get_user_exception()
-    return db.query(models.Todos)\
-        .filter(models.Todos.owner_id == user.get("id"))\
+    return db.query(Todos)\
+        .filter(Todos.owner_id == user.get("id"))\
         .all()
 
 
@@ -45,9 +39,9 @@ async def read_todo(todo_id: int,
     if not user:
         raise get_user_exception()
     if (
-        todo_model := db.query(models.Todos)
-        .filter(models.Todos.id == todo_id)
-        .filter(models.Todos.owner_id == user.get("id"))
+        todo_model := db.query(Todos)
+        .filter(Todos.id == todo_id)
+        .filter(Todos.owner_id == user.get("id"))
         .first()
     ):
         return todo_model
@@ -60,7 +54,7 @@ async def create_todo(todo: Todo,
                       db: Session = Depends(get_db)):
     if user is None:
         raise get_user_exception()
-    todo_model = models.Todos()
+    todo_model = Todos()
     todo_model.title = todo.title
     todo_model.description = todo.description
     todo_model.priority = todo.priority
@@ -81,9 +75,9 @@ async def update_todo(todo_id: int,
     if user is None:
         raise get_user_exception()
 
-    todo_model = db.query(models.Todos)\
-        .filter(models.Todos.id == todo_id)\
-        .filter(models.Todos.owner_id == user.get("id"))\
+    todo_model = db.query(Todos)\
+        .filter(Todos.id == todo_id)\
+        .filter(Todos.owner_id == user.get("id"))\
         .first()
 
     if todo_model is None:
@@ -107,16 +101,16 @@ async def delete_todo(todo_id: int,
     if user is None:
         raise get_user_exception()
 
-    todo_model = db.query(models.Todos)\
-        .filter(models.Todos.id == todo_id)\
-        .filter(models.Todos.owner_id == user.get("id"))\
+    todo_model = db.query(Todos)\
+        .filter(Todos.id == todo_id)\
+        .filter(Todos.owner_id == user.get("id"))\
         .first()
 
     if todo_model is None:
         raise http_exception()
 
-    db.query(models.Todos)\
-        .filter(models.Todos.id == todo_id)\
+    db.query(Todos)\
+        .filter(Todos.id == todo_id)\
         .delete()
 
     db.commit()
@@ -129,23 +123,3 @@ def successful_response(status_code: int):
         'status': status_code,
         'transaction': 'Successful'
     }
-
-
-def http_exception():
-    return HTTPException(status_code=404, detail="Todo not found")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

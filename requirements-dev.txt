@@ -1,8 +1,9 @@
-pytest
-ipython
 black
+flake8
+httpx
+ipython
 isort
 mypy
-flake8
+pre-commit
+pytest
 pytest_cov
-httpx

@@ -20,3 +20,13 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def create_db_schema(engine):
+    with SessionLocal() as db:
+        Base.metadata.create_all(engine, checkfirst=True)
+        db.commit()
+
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    print("Creating tables...")
+    create_db_schema(engine)

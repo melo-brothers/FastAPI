@@ -31,3 +31,17 @@ def test_get_valid_token(client: TestClient):
     client.post("/auth/create/user", json=BODY)
     resp = client.post("/auth/token", headers=headers, data=payload)
     assert resp.json()["token"] is not None
+
+
+def test_invalid_token_must_raises_unauthorized(client: TestClient):
+    headers = {
+        "accept": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    payload = {
+        "username": BODY["username"],
+        "password": "senhaInvalida",
+    }
+    client.post("/auth/create/user", json=BODY)
+    resp = client.post("/auth/token", headers=headers, data=payload)
+    assert resp.status_code == status.HTTP_401_UNAUTHORIZED
