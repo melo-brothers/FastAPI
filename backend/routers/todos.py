@@ -16,8 +16,6 @@ router = APIRouter(
 )
 
 
-
-
 class Todo(BaseModel):
     title: str
     description: Optional[str]

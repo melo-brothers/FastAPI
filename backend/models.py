@@ -20,6 +20,12 @@ class Users(Base):
     todos = relationship("Todos", back_populates="owner")
     address = relationship("Address", back_populates="user_address")
 
+    def json(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "email": self.email,
+        }
 
 class Todos(Base):
     __tablename__ = "todos"

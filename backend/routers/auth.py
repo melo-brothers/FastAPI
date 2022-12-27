@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -10,8 +10,8 @@ from sqlalchemy.orm import Session
 
 from backend import models
 from backend.database import get_db
+from backend.settings import SECRET_KEY
 
-SECRET_KEY = "KlgH6AzYDeZeGwD288to79I3vTHT8wp7"
 ALGORITHM = "HS256"
 
 
@@ -71,7 +71,7 @@ async def get_current_user(token: str = Depends(oauth2_bearer)):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         user_id: int = payload.get("id")
-        if not username or not user_id :
+        if not username or not user_id:
             raise get_user_exception()
         return {"username": username, "id": user_id}
     except JWTError as e:
@@ -79,20 +79,31 @@ async def get_current_user(token: str = Depends(oauth2_bearer)):
 
 
 @router.post("/create/user")
-async def create_new_user(create_user: CreateUser, db: Session = Depends(get_db)):
-    create_user_model = models.Users()
-    create_user_model.email = create_user.email
-    create_user_model.username = create_user.username
-    create_user_model.first_name = create_user.first_name
-    create_user_model.last_name = create_user.last_name
+async def create_new_user(create_user: CreateUser, response: Response, db: Session = Depends(get_db)):
+    try:
+        create_user_model = models.Users()
+        create_user_model.email = create_user.email
+        create_user_model.username = create_user.username
+        create_user_model.first_name = create_user.first_name
+        create_user_model.last_name = create_user.last_name
 
-    hash_password = get_password_hash(create_user.password)
+        hash_password = get_password_hash(create_user.password)
 
-    create_user_model.hashed_password = hash_password
-    create_user_model.is_active = True
+        create_user_model.hashed_password = hash_password
+        create_user_model.is_active = True
 
-    db.add(create_user_model)
-    db.commit()
+        db.add(create_user_model)
+        db.commit()
+    except Exception as e:
+        # Create log for generic exception
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail={"message": "Não foi possível criar o usuário", "error": e},
+        ) from e
+    else:
+        response.status_code = status.HTTP_201_CREATED
+        return create_user_model.json()
 
 
 @router.post("/token")
@@ -108,7 +119,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"token": token}
 
 
-#Exceptions
+# Exceptions
 def get_user_exception():
     return HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,

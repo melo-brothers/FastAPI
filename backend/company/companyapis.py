@@ -1,7 +1,13 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from .dependencies import get_token_header
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/companyapis",
+    tags=["companysapis"],
+    dependencies=[Depends(get_token_header)],
+    responses={418: {"description": "Internal Use Only"}}
+)
 
 
 @router.get("/")
