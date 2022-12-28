@@ -29,4 +29,5 @@ DEFAULT_MSG = {
 error_messages = defaultdict(lambda: DEFAULT_MSG, error_messages)
 
 
-def 
+def raise_message(msg):
+    raise NotImplementedError

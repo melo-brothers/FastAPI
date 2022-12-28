@@ -2,6 +2,7 @@
 .python-version
 *.sqlite
 *.db
+.coverage
 __pycache__/
 .mypy_cache/
 .pytest_cache/
