@@ -1,9 +1,10 @@
 from collections import defaultdict
+from fastapi import HTTPException, status
 
-error_messages = {
+ERROR_MESSAGES = {
     4001: {
         "code": 4001,
-        "http_status": 400,
+        "status_code": status.HTTP_400_BAD_REQUEST,
         "type": "Alerta",
         "category": "Negocial",
         "name": "Parâmetro incorreto",
@@ -16,7 +17,7 @@ error_messages = {
 
 DEFAULT_MSG = {
     "code": 5000,
-    "http_status": 500,
+    "status_code": status.HTTP_503_SERVICE_UNAVAILABLE,
     "type": "Alert",
     "category": "System",
     "subcategory": "Internal",
@@ -26,8 +27,22 @@ DEFAULT_MSG = {
     "action": "Por favor registre uma...",
 }
 
-error_messages = defaultdict(lambda: DEFAULT_MSG, error_messages)
+ERROR_MESSAGES = defaultdict(lambda: DEFAULT_MSG, ERROR_MESSAGES)
 
 
-def raise_message(msg):
-    raise NotImplementedError
+def raise_message(msg_code: int, preview=False, **kwargs):
+    msg = ERROR_MESSAGES[msg_code]
+    if msg["code"] != 5000 and kwargs:
+        for k, v in kwargs.items():
+            msg[k].format(v)
+
+    status_code = msg["status_code"]
+    del msg["status_code"]
+    exc = HTTPException(
+        status_code=status_code,
+        detail=msg
+    )
+    if preview:
+        return exc
+
+    raise exc

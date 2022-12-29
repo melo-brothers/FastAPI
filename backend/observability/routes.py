@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from ..core.errors import error_messages
+from ..core.errors import ERROR_MESSAGES
 
 router = APIRouter(
     tags=["observability"],
@@ -15,9 +15,9 @@ async def health():
 
 @router.get("/errors")
 async def all_errors():
-    return error_messages
+    return ERROR_MESSAGES
 
 
 @router.get("/errors/{msg_code}")
 async def error_detail(msg_code: int):
-    return error_messages[msg_code]
+    return ERROR_MESSAGES[msg_code]
