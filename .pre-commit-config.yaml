@@ -16,10 +16,10 @@ repos:
     - id: requirements-txt-fixer
     - id: trailing-whitespace
 - repo: https://github.com/psf/black
-  rev: 22.10.0
+  rev: 22.12.0
   hooks:
   - id: black
-    language_version: python3.10
+    language_version: python3.11
     description: "Black: The uncompromising Python code formatter"
     require_serial: true
     types: [python]
@@ -28,7 +28,7 @@ repos:
       "--verbose"
     ]
 - repo: https://github.com/timothycrosley/isort
-  rev: 5.10.1
+  rev: 5.11.4
   hooks:
     - id: isort
       args: [

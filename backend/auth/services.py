@@ -10,6 +10,7 @@ from backend.settings import SECRET_KEY
 from ..core.exceptions import get_user_exception
 from .models import Users
 
+
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="token")
 ALGORITHM = "HS256"
@@ -23,19 +24,18 @@ def verify_password(plain_password, hashed_password):
     return bcrypt_context.verify(plain_password, hashed_password)
 
 
+def get_user(username: str, db):
+    return db.query(Users).filter(Users.username == username).first()
+
+
 def authenticate_user(username: str, password: str, db):
-    if (
-        user := db.query(Users)
-        .filter(Users.username == username)
-        .first()
-    ):
+    if user := db.query(Users).filter(Users.username == username).first():
         return user if verify_password(password, user.hashed_password) else False
     else:
         return False
 
 
-def create_access_token(username: str, user_id: int,
-                        expires_delta: timedelta | None = None):
+def create_access_token(username: str, user_id: int, expires_delta: timedelta | None = None):
 
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
